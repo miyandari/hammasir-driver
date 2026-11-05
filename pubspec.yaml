@@ -1,0 +1,51 @@
+name: hammasir_driver
+description: "اپ راننده‌ی هم‌مسیر؛ ارسال موقعیت، مدیریت سفر و اعلام خرابی"
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.8.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+
+  # شبکه و ذخیره‌سازی
+  http: ^1.2.2
+  flutter_secure_storage: ^9.2.2
+  shared_preferences: ^2.3.2
+
+  # نقشه
+  flutter_map: 7.0.2
+  latlong2: 0.9.1
+
+  # تاریخ شمسی
+  shamsi_date: ^1.1.1
+
+  # اثر انگشت
+  local_auth: ^2.3.0
+
+  # موقعیت کاربر روی نقشه
+  geolocator: ^13.0.2
+
+  # سطح شارژ باتری برای ردیابی کم‌مصرف
+  battery_plus: ^6.2.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+  flutter_launcher_icons: ^0.14.4
+
+flutter:
+  uses-material-design: true
+  fonts:
+    - family: Vazirmatn
+      fonts:
+        - asset: assets/fonts/Vazirmatn-Regular.ttf
+        - asset: assets/fonts/Vazirmatn-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Vazirmatn-Bold.ttf
+          weight: 700
