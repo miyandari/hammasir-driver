@@ -148,12 +148,12 @@ class DriverTrip {
   }
 
   factory DriverTrip.fromJson(Map<String, dynamic> json) {
-    final time = asString(json['planned_departure_time']);
+    final time = _hhmm(asString(json['planned_departure_time']));
     return DriverTrip(
       id: asInt(json['id']) ?? 0,
       serviceName: asString(json['service_name']),
       date: asString(json['trip_date']),
-      plannedTime: time.length >= 5 ? time.substring(0, 5) : time,
+      plannedTime: time,
       status: asString(json['status'], TripStatus.scheduled),
       reserved: asInt(json['reserved_count']) ?? 0,
       seats: asInt(json['seated_capacity']) ?? 0,
@@ -166,9 +166,24 @@ class DriverTrip {
   }
 }
 
+/// ساعت HH:mm از «زمان برنامه‌ای» سفر.
+/// بک‌اند تاریخ‌ساعت UTC (مثل 2026-11-05T03:15:00) می‌فرستد؛ به وقت تهران (UTC+3:30) برمی‌گردد.
+/// اگر فقط ساعت آمده باشد (07:30:00) همان بریده می‌شود.
+String _hhmm(String raw) {
+  final isDateTime = raw.length > 10 && (raw.contains('T') || raw[10] == ' ');
+  if (!isDateTime) return raw.length >= 5 ? raw.substring(0, 5) : raw;
+  final hasZone = raw.endsWith('Z') || RegExp(r'[+-]\d\d:?\d\d$').hasMatch(raw);
+  final utc = DateTime.tryParse(hasZone ? raw : '${raw.replaceFirst(' ', 'T')}Z');
+  if (utc == null) return raw.length >= 16 ? raw.substring(11, 16) : raw;
+  final t = utc.toUtc().add(const Duration(hours: 3, minutes: 30));
+  String two(int n) => n.toString().padLeft(2, '0');
+  return '${two(t.hour)}:${two(t.minute)}';
+}
+
 class ManifestPassenger {
   const ManifestPassenger({
-    required this.reservationId,
+    this.walkIn = false,
+    this.reservationId,
     required this.studentId,
     required this.name,
     required this.studentNumber,
@@ -178,7 +193,8 @@ class ManifestPassenger {
     required this.boarded,
   });
 
-  final int reservationId;
+  final bool walkIn;
+  final int? reservationId;
   final int studentId;
   final String name;
   final String studentNumber;
@@ -189,7 +205,8 @@ class ManifestPassenger {
 
   factory ManifestPassenger.fromJson(Map<String, dynamic> json) =>
       ManifestPassenger(
-        reservationId: asInt(json['reservation_id']) ?? 0,
+        walkIn: asBool(json['walk_in']),
+        reservationId: asInt(json['reservation_id']),
         studentId: asInt(json['student_id']) ?? 0,
         name: asString(json['name']),
         studentNumber: asString(json['student_number']),
@@ -238,5 +255,31 @@ class Manifest {
           for (final p in asMapList(json['pending_requests']))
             PendingRequest.fromJson(p),
         ],
+      );
+}
+
+/// نتیجه‌ی اسکن QR دانشجو.
+class ScanResult {
+  const ScanResult({
+    required this.result,
+    required this.name,
+    required this.studentNumber,
+    required this.hasReservation,
+    this.message,
+  });
+
+  /// boarded | already | needs_confirm | full | rejected
+  final String result;
+  final String name;
+  final String studentNumber;
+  final bool hasReservation;
+  final String? message;
+
+  factory ScanResult.fromJson(Map<String, dynamic> json) => ScanResult(
+        result: asString(json['result']),
+        name: asString(json['name']),
+        studentNumber: asString(json['student_number']),
+        hasReservation: asBool(json['has_reservation']),
+        message: asNullableString(json['message']),
       );
 }

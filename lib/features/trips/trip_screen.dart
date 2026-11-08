@@ -16,6 +16,7 @@ import 'package:hammasir_driver/features/breakdown/breakdown_screen.dart';
 import 'package:hammasir_driver/features/shared/page_header.dart';
 import 'package:hammasir_driver/features/shared/status_labels.dart';
 import 'package:hammasir_driver/features/shared/ui_helpers.dart';
+import 'package:hammasir_driver/features/trips/scan_screen.dart';
 import 'package:hammasir_driver/features/trips/tracking_banner.dart';
 import 'package:hammasir_driver/l10n/l10n.dart';
 
@@ -96,9 +97,13 @@ class _TripScreenState extends State<TripScreen> {
     setState(() => _busy = true);
     try {
       await _deps.driver.setStatus(trip.id, next);
-      await _stores.trips.load(silent: true);
-      await _stores.syncTracking();
-      await _loadManifest();
+      try {
+        await _stores.trips.load(silent: true);
+        await _stores.syncTracking();
+      } finally {
+        // فهرست مسافران در هر حال بعد از تغییر وضعیت تازه می‌شود.
+        await _loadManifest();
+      }
     } on ApiException catch (e) {
       if (mounted) showMessage(context, e.message, tone: Tone.danger);
     } finally {
@@ -117,6 +122,15 @@ class _TripScreenState extends State<TripScreen> {
     } on ApiException catch (e) {
       if (mounted) showMessage(context, e.message, tone: Tone.danger);
     }
+  }
+
+  Future<void> _openScan() async {
+    await Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => ScanScreen(tripId: widget.tripId),
+      ),
+    );
+    await _loadManifest();
   }
 
   Future<void> _decide(PendingRequest r, bool approve) async {
@@ -198,6 +212,15 @@ class _TripScreenState extends State<TripScreen> {
             ),
           ),
         if (trip.isActive) ...[
+          const SizedBox(height: 10),
+          FilledButton.tonalIcon(
+            onPressed: _openScan,
+            icon: const Icon(Icons.qr_code_scanner_rounded),
+            label: Text(context.t('drv.scan')),
+            style: FilledButton.styleFrom(
+              minimumSize: const Size.fromHeight(52),
+            ),
+          ),
           const SizedBox(height: 10),
           OutlinedButton.icon(
             onPressed: () => Navigator.of(context).push(
@@ -320,6 +343,13 @@ class _TripScreenState extends State<TripScreen> {
                         ],
                       ),
                     ),
+                    if (m.walkIn) ...[
+                      StatusChip(
+                        label: context.t('drv.walk_in'),
+                        tone: Tone.warning,
+                      ),
+                      const SizedBox(width: 6),
+                    ],
                     if (m.boarded)
                       StatusChip(
                         label: context.t('drv.boarded'),
@@ -328,6 +358,11 @@ class _TripScreenState extends State<TripScreen> {
                     else if (trip.isActive)
                       OutlinedButton(
                         onPressed: () => _board(m),
+                        // تم برنامه حداقل عرض بی‌نهایت دارد؛ داخل Row باید صفر باشد.
+                        style: OutlinedButton.styleFrom(
+                          minimumSize: const Size(0, 40),
+                          padding: const EdgeInsets.symmetric(horizontal: 14),
+                        ),
                         child: Text(context.t('drv.mark_boarded')),
                       ),
                   ],

@@ -24,6 +24,9 @@ dependencies:
   # تاریخ شمسی
   shamsi_date: ^1.1.1
 
+  # اسکن QR دانشجویان
+  mobile_scanner: ^6.0.2
+
   # اثر انگشت
   local_auth: ^2.3.0
 

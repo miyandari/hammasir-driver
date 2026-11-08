@@ -6,6 +6,8 @@
 	<true/>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
+	<key>NSCameraUsageDescription</key>
+	<string>برای اسکن QR دانشجویان هنگام سوار شدن</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>برای ارسال موقعیت خودرو به دانشجویان</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>

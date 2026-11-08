@@ -72,6 +72,22 @@ class DriverRepository {
     );
   }
 
+  /// اسکن QR دانشجو. بدون رزرو، تا [confirmWalkIn] نباشد ثبت نمی‌شود.
+  Future<ScanResult> scan({
+    required int tripId,
+    required String token,
+    bool confirmWalkIn = false,
+  }) async {
+    final map = asMap(
+      await _api.post(
+        '/driver/trips/$tripId/scan',
+        body: {'qr_token': token, 'confirm_walk_in': confirmWalkIn},
+      ),
+    );
+    if (map == null) throw ApiException(L10n.t('err.profile_failed'));
+    return ScanResult.fromJson(map);
+  }
+
   Future<void> decideRequest(int requestId, {required bool approve}) async {
     await _api.post(
       '/boarding-requests/$requestId/${approve ? 'approve' : 'reject'}',
