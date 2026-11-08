@@ -114,6 +114,17 @@ class DriverRepository {
     );
   }
 
+  /// اعلام تأخیر؛ دانشجویان رزروکننده اعلان می‌گیرند.
+  Future<void> reportDelay(int tripId, int minutes, String? reason) async {
+    await _api.post(
+      '/driver/trips/$tripId/delay',
+      body: {
+        'minutes': minutes,
+        if (reason != null && reason.trim().isNotEmpty) 'reason': reason.trim(),
+      },
+    );
+  }
+
   Future<void> reportBreakdown(
     int tripId,
     Map<String, dynamic> payload,

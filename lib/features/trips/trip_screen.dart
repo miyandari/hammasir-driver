@@ -13,6 +13,7 @@ import 'package:hammasir_driver/core/widgets/route_map.dart';
 import 'package:hammasir_driver/core/widgets/status_chip.dart';
 import 'package:hammasir_driver/data/models/driver.dart';
 import 'package:hammasir_driver/features/breakdown/breakdown_screen.dart';
+import 'package:hammasir_driver/features/delay/delay_sheet.dart';
 import 'package:hammasir_driver/features/shared/page_header.dart';
 import 'package:hammasir_driver/features/shared/status_labels.dart';
 import 'package:hammasir_driver/features/shared/ui_helpers.dart';
@@ -211,6 +212,17 @@ class _TripScreenState extends State<TripScreen> {
               minimumSize: const Size.fromHeight(52),
             ),
           ),
+        if (!trip.isFinished) ...[
+          const SizedBox(height: 10),
+          OutlinedButton.icon(
+            onPressed: () => showDelaySheet(context, trip.id),
+            icon: const Icon(Icons.schedule_rounded),
+            label: Text(context.t('delay.report')),
+            style: OutlinedButton.styleFrom(
+              minimumSize: const Size.fromHeight(52),
+            ),
+          ),
+        ],
         if (trip.isActive) ...[
           const SizedBox(height: 10),
           FilledButton.tonalIcon(
